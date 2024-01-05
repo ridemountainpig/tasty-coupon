@@ -23,7 +23,9 @@ coupon_table_title = ["優惠內容", "優惠代碼", "優惠期間", "適用範
 coupon_category = ["subscription", "God", "Food", "Grocery", "Store"]
 
 coupon_md = f"""
-## {coupon_name}
+### {coupon_name}
+| 優惠內容 | 優惠代碼 | 優惠期間 | 適用範圍 |
+| --- | --- | --- | --- |
 """
 
 for category in coupon_category:
@@ -34,27 +36,20 @@ for category in coupon_category:
     temp_dict = {}
     temp_list = []
 
-    coupon_md_temp = f"""
-### {coupon_title}
-| 優惠內容 | 優惠代碼 | 優惠期間 | 適用範圍 |
-| --- | --- | --- | --- |
-"""
-
     for coupon in coupon_table:
         coupon_content = coupon.find_all("td")
 
         for i in range(len(coupon_content)):
             temp_dict[coupon_table_title[i % 4]] = coupon_content[i].text
-            temp_list.append("無" if coupon_content[i].text == "" else coupon_content[i].text)
+            temp_list.append("```無```" if coupon_content[i].text == "" else f"```{coupon_content[i].text}```")
             if i != 0 and (i + 1) % 4 == 0:
                 coupon_dict[coupon_name][coupon_title].append(temp_dict)
                 temp_dict = {}
 
+                temp_list[0] = f"**{coupon_title}** : {temp_list[0]}"
                 md_content = "|" + "|".join(temp_list) + "|\n"
-                coupon_md_temp += md_content
+                coupon_md += md_content
                 temp_list = []
-
-    coupon_md += coupon_md_temp
 
 json_string = json.dumps(coupon_dict, indent=4, ensure_ascii=False)
 
