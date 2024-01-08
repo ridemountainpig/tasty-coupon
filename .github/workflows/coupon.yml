@@ -1,4 +1,4 @@
-name: Update Uber Eats and Foodpanda coupon
+name: Uber Eats and Foodpanda coupon
 
 on:
   push:
