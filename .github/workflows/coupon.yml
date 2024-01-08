@@ -1,9 +1,6 @@
 name: Uber Eats and Foodpanda coupon
 
 on:
-  push:
-    branches:
-      - workflow-dev
   schedule:
       - cron: "0 */24 * * *"
   workflow_dispatch:
@@ -52,6 +49,6 @@ jobs:
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-          branch: workflow-dev
+          branch: main
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
