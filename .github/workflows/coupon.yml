@@ -1,6 +1,9 @@
 name: Update Uber Eats and Foodpanda coupon
 
 on:
+  push:
+    branches:
+      - workflow-dev
   schedule:
       - cron: "0 */24 * * *"
   workflow_dispatch:
