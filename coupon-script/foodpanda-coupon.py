@@ -16,7 +16,8 @@ html_content = response.text
 
 soup = BeautifulSoup(html_content, "html.parser")
 
-coupon_name = soup.find(class_ = "entry-title").text.split("【")[0] + " " + soup.find(class_ = "post-modified-info").text.split("：")[1]
+coupon_date = soup.find(class_ = "post-modified-info").text.split("：")[1].split(" ")
+coupon_name = soup.find(class_ = "entry-title").text.split("【")[0] + " " + " ".join(coupon_date[0 : 4])
 
 coupon_dict = {coupon_name: {}}
 coupon_table_title = ["優惠內容", "優惠代碼", "優惠期間", "適用範圍"]
