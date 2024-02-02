@@ -16,12 +16,15 @@ html_content = response.text
 
 soup = BeautifulSoup(html_content, "html.parser")
 
-coupon_date = soup.find(class_ = "post-modified-info").text.split("：")[1].split(" ")
-coupon_name = soup.find(class_ = "entry-title").text.split("【")[0] + " " + " ".join(coupon_date[0 : 4])
+coupon_date = soup.find(
+    class_="post-modified-info").text.split("：")[1].split(" ")
+coupon_name = soup.find(
+    class_="entry-title").text.split("【")[0] + " " + " ".join(coupon_date[0: 4])
 
 coupon_dict = {coupon_name: {}}
 coupon_table_title = ["優惠內容", "優惠代碼", "優惠期間", "適用範圍"]
-coupon_category = ["FP-subscription", "Promo-Food-FP", "God-FP", "Promo-restaurant-FP", "Promo-Fresh-FP"]
+coupon_category = ["FP-subscription", "Promo-Food-FP",
+                   "God-FP", "Promo-restaurant-FP", "Promo-Fresh-FP"]
 
 coupon_md = f"""
 ### {coupon_name}
@@ -40,6 +43,9 @@ for category in coupon_category:
     for coupon in coupon_table:
         coupon_content = coupon.find_all("td")
         for i in range(len(coupon_content)):
+            if "kb56.tw" in coupon_content[i].text:
+                continue
+
             temp_dict[coupon_table_title[i % 4]] = coupon_content[i].text
             temp_list.append("```無```" if coupon_content[i].text == "" else f"```{coupon_content[i].text.replace('丨', '').replace(' ', '')}```")
             if i != 0 and (i + 1) % 4 == 0:
