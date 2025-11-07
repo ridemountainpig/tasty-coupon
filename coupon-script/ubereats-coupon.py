@@ -1,18 +1,25 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import json
+import time
 
 url = "https://kb56.tw/uber-eats-coupon/"
 
-header = {
-    "Content-Type":
-        "application/json",
-        "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
-}
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')
 
-response = requests.get(url, headers=header)
-html_content = response.text
+driver = webdriver.Chrome(options=chrome_options)
+
+try:
+    driver.get(url)
+    time.sleep(10)
+    html_content = driver.page_source
+finally:
+    driver.quit()
 
 soup = BeautifulSoup(html_content, "html.parser")
 
