@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 import json
 import time
@@ -16,7 +17,9 @@ driver = webdriver.Chrome(options=chrome_options)
 
 try:
     driver.get(url)
-    time.sleep(10)
+    WebDriverWait(driver, 30).until(
+        lambda d: d.execute_script("return document.readyState") == "complete"
+    )
     html_content = driver.page_source
 finally:
     driver.quit()
