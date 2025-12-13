@@ -33,8 +33,7 @@ coupon_name = soup.find(
 
 coupon_dict = {coupon_name: {}}
 coupon_table_title = ["優惠內容", "優惠代碼", "優惠期間", "適用範圍"]
-coupon_category = ["FP-subscription", "Promo-Food-FP",
-                   "God-FP", "Promo-restaurant-FP", "Promo-Fresh-FP"]
+coupon_category = ["FP-subscription", "Promo-Food-FP", "Promo-restaurant-FP", "Promo-Fresh-FP"]
 
 coupon_md = f"""
 ### {coupon_name}
