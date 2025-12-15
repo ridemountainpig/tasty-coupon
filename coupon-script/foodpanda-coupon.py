@@ -27,7 +27,7 @@ finally:
 soup = BeautifulSoup(html_content, "html.parser")
 
 coupon_date = soup.find(
-    class_="post-modified-info").text.split("：")[1].split(" ")
+    class_="kb56-date-box").text.split("：")[1].split(" ")
 coupon_name = soup.find(
     class_="entry-title").text.split("【")[0] + " " + " ".join(coupon_date[0: 4])
 
