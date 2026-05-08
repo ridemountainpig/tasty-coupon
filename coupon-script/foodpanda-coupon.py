@@ -3,7 +3,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 import json
-import time
 
 url = "https://kb56.tw/foodpanda-coupon/"
 
@@ -29,42 +28,49 @@ soup = BeautifulSoup(html_content, "html.parser")
 coupon_date = soup.find(
     class_="kb56-date-box").text.split("：")[1].split(" ")
 coupon_name = soup.find(
-    class_="entry-title").text.split("【")[0] + " " + " ".join(coupon_date[0: 4])
+    class_="entry-title").text.split("【")[0] + " " + " ".join(coupon_date[0:4])
 
 coupon_dict = {coupon_name: {}}
-coupon_table_title = ["優惠內容", "優惠代碼", "優惠期間", "適用範圍"]
-coupon_category = ["FP-subscription", "Promo-Food-FP", "Promo-restaurant-FP", "Promo-Fresh-FP"]
+coupon_md = f"\n### {coupon_name}\n"
 
-coupon_md = f"""
-### {coupon_name}
-| 優惠內容 | 優惠代碼 | 優惠期間 | 適用範圍 |
-| --- | --- | --- | --- |
-"""
+for table in soup.find_all("table"):
+    tbody = table.find("tbody")
+    if not tbody:
+        continue
 
-for category in coupon_category:
-    coupon_title = soup.find(id=category).text
-    coupon_table = soup.find(id=category).find_next("tbody").find_all("tr")
+    heading = table.find_previous(["h2", "h3", "h4"])
+    category_title = heading.text.strip() if heading else "其他"
 
-    coupon_dict[coupon_name][coupon_title] = []
-    temp_dict = {}
-    temp_list = []
+    thead = table.find("thead")
+    headers = [th.text.strip() for th in thead.find_all(["th", "td"])] if thead else []
 
-    for coupon in coupon_table:
-        coupon_content = coupon.find_all("td")
-        for i in range(len(coupon_content)):
-            if "kb56.tw" in coupon_content[i].text:
-                continue
+    category_data = []
+    for row in tbody.find_all("tr"):
+        cells = row.find_all("td")
+        if not cells:
+            continue
+        if any("kb56.tw" in cell.text for cell in cells):
+            continue
 
-            temp_dict[coupon_table_title[i % 4]] = coupon_content[i].text
-            temp_list.append("```無```" if coupon_content[i].text == "" else f"```{coupon_content[i].text.replace('丨', '').strip()}```")
-            if i != 0 and (i + 1) % 4 == 0:
-                coupon_dict[coupon_name][coupon_title].append(temp_dict)
-                temp_dict = {}
+        cell_texts = [cell.text.strip().replace("(點擊複製)", "").replace("(點擊前往)", "").strip() for cell in cells]
+        if headers and len(headers) == len(cell_texts):
+            row_dict = dict(zip(headers, cell_texts))
+        else:
+            row_dict = {f"col_{i}": v for i, v in enumerate(cell_texts)}
+        category_data.append(row_dict)
 
-                temp_list[0] = f"**{coupon_title.replace('丨', '').replace(' ', '')}** : {temp_list[0]}"
-                md_content = "|" + "|".join(temp_list) + "|\n"
-                coupon_md += md_content
-                temp_list = []
+    if not category_data:
+        continue
+
+    coupon_dict[coupon_name][category_title] = category_data
+
+    col_keys = headers if headers else list(category_data[0].keys())
+    coupon_md += f"\n#### {category_title}\n"
+    coupon_md += "| " + " | ".join(col_keys) + " |\n"
+    coupon_md += "| " + " | ".join(["---"] * len(col_keys)) + " |\n"
+    for row_dict in category_data:
+        cells = [v or "無" for v in row_dict.values()]
+        coupon_md += "| " + " | ".join(cells) + " |\n"
 
 json_string = json.dumps(coupon_dict, indent=4, ensure_ascii=False)
 
