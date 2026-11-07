@@ -42,8 +42,12 @@ soup = BeautifulSoup(html_content, "html.parser")
 date_box = soup.find(class_="kb56-date-box")
 entry_title = soup.find(class_="entry-title")
 
-coupon_date = date_box.text.split("：")[1].split(" ") if date_box else ["未知日期"]
-title_prefix = entry_title.text.split("【")[0] if entry_title else "Uber Eats 優惠券"
+# Abort before touching existing files if the page layout changed
+if not date_box or not entry_title or "：" not in date_box.text:
+    raise RuntimeError("Coupon page is missing metadata")
+
+coupon_date = date_box.text.split("：")[1].split(" ")
+title_prefix = entry_title.text.split("【")[0]
 coupon_name = f"{title_prefix} {' '.join(coupon_date[0:4])}".strip()
 
 coupon_dict = {coupon_name: {}}
@@ -91,9 +95,9 @@ for table in soup.find_all("table"):
         cells = [escape_md(v) if v else "無" for v in row_dict.values()]
         coupon_md += "| " + " | ".join(cells) + " |\n"
 
-# Validate that metadata and coupon data exist before overwriting files
-if not date_box or not entry_title or not coupon_dict.get(coupon_name):
-    raise RuntimeError("Coupon page is missing metadata or coupon data")
+# Abort before overwriting existing files if no coupon rows were parsed
+if not coupon_dict[coupon_name]:
+    raise RuntimeError("Coupon page has no coupon data")
 
 Path("coupon-json").mkdir(parents=True, exist_ok=True)
 Path("asset/md").mkdir(parents=True, exist_ok=True)
